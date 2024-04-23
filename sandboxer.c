@@ -53,6 +53,7 @@ static inline int landlock_restrict_self(const int ruleset_fd,
 
 #define ENV_FS_RO_NAME "LL_FS_RO"
 #define ENV_FS_RW_NAME "LL_FS_RW"
+#define ENV_FS_DENY_NAME "LL_FS_DENY"
 #define ENV_TCP_BIND_NAME "LL_TCP_BIND"
 #define ENV_TCP_CONNECT_NAME "LL_TCP_CONNECT"
 #define ENV_DELIMITER ":"
@@ -181,6 +182,10 @@ out_free_name:
 }
 
 /* clang-format off */
+
+#define ACCESS_FS_ONLY_DIR ( \
+	LANDLOCK_ACCESS_FS_READ_DIR \
+)
 
 #define ACCESS_FS_ROUGHLY_READ ( \
 	LANDLOCK_ACCESS_FS_EXECUTE | \
@@ -355,6 +360,9 @@ int main(const int argc, char *const argv[], char *const *const envp)
 		return 1;
 	}
 
+	if (populate_ruleset_fs(ENV_FS_DENY_NAME, ruleset_fd, ACCESS_FS_ONLY_DIR)) {
+		goto err_close_ruleset;
+	}
 	if (populate_ruleset_fs(ENV_FS_RO_NAME, ruleset_fd, access_fs_ro)) {
 		goto err_close_ruleset;
 	}
